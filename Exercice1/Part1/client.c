@@ -7,63 +7,67 @@
 #include <netinet/in.h>
 
 #define MAX 80
-#define PORT 6000
+#define PORT 2021
 #define SA struct sockaddr
 
-
-void func(int sockfd)
-{
-	char buff[MAX];
-	int n;
-	for (;;) {
-		bzero(buff, sizeof(buff));
-		printf("Enter the string : ");
-		n = 0;
-		while ((buff[n++] = getchar()) != '\n')
-			;
-		write(sockfd, buff, sizeof(buff));
-		bzero(buff, sizeof(buff));
-		read(sockfd, buff, sizeof(buff));
-		printf("From Server : %s", buff);
-		if ((strncmp(buff, "exit", 4)) == 0) {
-			printf("Client Exit...\n");
-			break;
-		}
-	}
-}
 
 int main()
 {
 	int sockfd, connfd;
 	struct sockaddr_in servaddr, cli;
 
-	// socket create and varification
+	// Creer Socket pour le client en se basant sur TCP , et Ipv4
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1) {
-		printf("socket creation failed...\n");
+		printf("la création du socket a échoué \n");
 		exit(0);
 	}
-	else
-		printf("Socket successfully created..\n");
-	bzero(&servaddr, sizeof(servaddr));
+	else{
+		printf("Socket créé avec succès\n");
+	}
 
-	// assign IP, PORT
+	memset(&servaddr, 0 ,sizeof(servaddr));
+
+
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	servaddr.sin_addr.s_addr = inet_addr("192.168.1.15");
 	servaddr.sin_port = htons(PORT);
 
-	// connect the client socket to server socket
+	// connecter le socket de client avec le socket du serveur
 	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) {
-		printf("connection with the server failed...\n");
+		printf("la connexion avec le serveur a échoué\n");
 		exit(0);
 	}
 	else
-		printf("connected to the server..\n");
+		printf("connecté au serveur\n");
 
-	// function for chat
-	func(sockfd);
+	// demarrer le chat
 
-	// close the socket
+	char buffer[MAX];
+	int n;
+
+	//demarrer une boucle infinie de chat
+	for (;;) {
+
+		//memset -> permet de mettre en zero une zone memoire en C
+		memset(buffer, 0 ,sizeof(buffer));
+		printf("Enter votre message : ");
+		n = 0;
+		while ((buffer[n++] = getchar()) != '\n')
+			;
+		write(sockfd, buffer, sizeof(buffer));
+		memset(buffer, 0 ,sizeof(buffer));
+		read(sockfd, buffer, sizeof(buffer));
+		printf("Du Serveur : %s", buffer);
+
+		//pour quitter le chat
+		if ((strncmp(buffer, "exit", 4)) == 0) {
+			printf("Sortie client ...\n");
+			break;
+		}
+	}
+
+	// fermer socket
 	close(sockfd);
 }
 
