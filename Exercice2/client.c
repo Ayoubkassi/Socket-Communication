@@ -6,58 +6,51 @@
 #define MAX 80
 #define PORT 2021
 #define SA struct sockaddr
-void func(int sockfd)
-{
-	char buff[MAX];
-	int n;
-	for (;;) {
-		bzero(buff, sizeof(buff));
-		printf("Enter the string : ");
-		n = 0;
-		while ((buff[n++] = getchar()) != '\n')
-			;
-		write(sockfd, buff, sizeof(buff));
-		bzero(buff, sizeof(buff));
-		read(sockfd, buff, sizeof(buff));
-		printf("From Server : %s", buff);
-		if ((strncmp(buff, "exit", 4)) == 0) {
-			printf("Client Exit...\n");
-			break;
-		}
-	}
-}
+
 
 int main()
 {
+    char operator;
+    int op1,op2,result;
 	int sockfd, connfd;
 	struct sockaddr_in6 servaddr, cli;
 
-	// socket create and varification
+	// Creation du socket en se basant sur IPV6
 	sockfd = socket(AF_INET6, SOCK_STREAM, 0);
 	if (sockfd == -1) {
-		printf("socket creation failed...\n");
+		printf("la création du socket a échoué\n");
 		exit(0);
 	}
 	else
-		printf("Socket successfully created..\n");
-	bzero(&servaddr, sizeof(servaddr));
+		printf("Socket créé avec succès\n");
+	memset(&servaddr, 0 ,sizeof(servaddr));
 
-	// assign IP, PORT
+	// completer les informations additionel 
 	servaddr.sin6_family = AF_INET6;
 	servaddr.sin6_addr = in6addr_any;
 	servaddr.sin6_port = htons(PORT);
 
-	// connect the client socket to server socket
+	// connecter le client avec le serveur 
 	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) {
-		printf("connection with the server failed...\n");
+		printf("la connexion avec le serveur a échoué\n");
 		exit(0);
 	}
 	else
-		printf("connected to the server..\n");
+		printf("connecté au serveur\n");
 
-	// function for chat
-	func(sockfd);
+	// Logique de calculatrice
 
-	// close the socket
+    printf("Entrez une operation : ");
+    scanf("%c",&operator);
+    printf("Entrez 2 nombres : ");
+    scanf("%d %d", &op1, &op2);
+
+    write(sockfd,&operator,10);
+    write(sockfd,&op1,sizeof(op1));
+    write(sockfd,&op2,sizeof(op2));
+    read(sockfd,&result,sizeof(result)); 
+    printf("Résultat de calcul du serveur est : %d\n",result);
+
+	// fermer socket
 	close(sockfd);
 }
