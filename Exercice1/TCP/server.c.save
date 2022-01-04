@@ -60,17 +60,17 @@ int main()
 	char buffer[MAX];
 	int n;
 
-	for (;;) {
+	for(int k=0;k<1;k++) {
 		memset(buffer,0, MAX);
-		read(connfd, buffer, sizeof(buffer));
-		printf("From client: %s\t To client : ", buffer);
+		//read(connfd, buffer, sizeof(buffer));
+		printf("Du client: %s);
 		memset(buffer,0, MAX);
 		n = 0;
 		while ((buffer[n++] = getchar()) != '\n');			
 		write(connfd, buffer, sizeof(buffer));
 
 		if (strncmp("exit", buffer, 4) == 0) {
-			printf("Server Exit...\n");
+			printf("Sortie du Serveur...\n");
 			break;
 		}
 	}

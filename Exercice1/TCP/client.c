@@ -47,18 +47,18 @@ int main()
 	int n;
 
 	//demarrer une boucle infinie de chat
-	for (;;) {
+	for(int k=0;k<1;k++) {
 
 		//memset -> permet de mettre en zero une zone memoire en C
 		memset(buffer, 0 ,sizeof(buffer));
-		printf("Enter votre message : ");
+		printf("Entrer votre message : ");
 		n = 0;
 		while ((buffer[n++] = getchar()) != '\n')
 			;
 		write(sockfd, buffer, sizeof(buffer));
 		memset(buffer, 0 ,sizeof(buffer));
 		read(sockfd, buffer, sizeof(buffer));
-		printf("Du Serveur : %s", buffer);
+		//printf("Du Serveur : %s", buffer);
 
 		//pour quitter le chat
 		if ((strncmp(buffer, "exit", 4)) == 0) {
