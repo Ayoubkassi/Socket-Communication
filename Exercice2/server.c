@@ -6,59 +6,54 @@
 #include<string.h> 
 #include <arpa/inet.h>
 
-void main()
-{
-int b,sockfd,connfd,sin_size,l,n,len;
-char operator;
-int op1,op2,result;
-if((sockfd=socket(AF_INET,SOCK_STREAM,0))>0)
-printf("socket created sucessfully\n");  //socket creation
-//printf("%d\n", sockfd);                 //on success 0 otherwise -1
+#define PORT 2021
 
-struct sockaddr_in servaddr;              
-struct sockaddr_in clientaddr;
+int main(){
 
-servaddr.sin_family=AF_INET;
-servaddr.sin_addr.s_addr=inet_addr("127.0.0.1");
-servaddr.sin_port=6006;
+        int b,sockfd,connfd,sin_size,l,n,len;
+        char operator;
+        int op1,op2,result;
+        if((sockfd=socket(AF_INET,SOCK_STREAM,0))>0)
+                printf("socket créé avec succès\n");  
 
-if((bind(sockfd, (struct sockaddr *)&servaddr,sizeof(servaddr)))==0)
-printf("bind sucessful\n");   //bind() assigns the
-     //  address  specified  by  addr  to  the  socket  referred  to by the file
-      // descriptor sockfd.  addrlen  specifies  the  size,  in  bytes,  of  the
-     //  address structure pointed to by addr.  Traditionally, this operation is
-      // called “assigning a name to a socket”.
+        struct sockaddr_in servaddr;              
+        struct sockaddr_in clientaddr;
 
-//printf("%d\n",b);
+        servaddr.sin_family=AF_INET;
+        servaddr.sin_addr.s_addr=inet_addr("192.168.1.15");
+        servaddr.sin_port=PORT;
 
-if((listen(sockfd,5))==0) //listen for connections on a socket
-printf("listen sucessful\n");
-//printf("%d\n",l);
+        if((bind(sockfd, (struct sockaddr *)&servaddr,sizeof(servaddr)))==0)
+                printf("liaison réussie\n"); 
 
-sin_size = sizeof(struct sockaddr_in);
-if((connfd=accept(sockfd,(struct sockaddr *)&clientaddr,&sin_size))>0);
-printf("accept sucessful\n");
-//printf("%d\n",connfd);
-read(connfd, &operator,10);
-read(connfd,&op1,sizeof(op1));
-read(connfd,&op2,sizeof(op2));
-switch(operator) {
-        case '+': result=op1 + op2;
-         printf("Result is: %d + %d = %d\n",op1, op2, result);
-         break;
-        case '-':result=op1 - op2;
-                printf("Result is: %d - %d = %d\n",op1, op2, result);
+
+        if((listen(sockfd,5))==0) 
+                printf("écoute réussie\n");
+
+        sin_size = sizeof(struct sockaddr_in);
+        if((connfd=accept(sockfd,(struct sockaddr *)&clientaddr,&sin_size))>0);
+        printf("accepter avec succès\n");
+        read(connfd, &operator,10);
+        read(connfd,&op1,sizeof(op1));
+        read(connfd,&op2,sizeof(op2));
+
+        switch(operator) {
+                case '+': result=op1 + op2;
+                printf("Resultat  de (+) est : %d + %d = %d\n",op1, op2, result);
                 break;
-        case '*':result=op1 * op2;
-                printf("Result is: %d * %d = %d\n",op1, op2, result);
-                break;
-        case '/':result=op1 / op2;
-                printf("Result is: %d / %d = %d\n",op1, op2, result);
-                break;
-        default: 
-                printf("ERROR: Unsupported Operation");
-    }
+                case '-':result=op1 - op2;
+                        printf("Resultat de (-) est: %d - %d = %d\n",op1, op2, result);
+                        break;
+                case '*':result=op1 * op2;
+                        printf("Resultat de (*) est: %d * %d = %d\n",op1, op2, result);
+                        break;
+                case '/':result=op1 / op2;
+                        printf("Resultat de (/) est : %d / %d = %d\n",op1, op2, result);
+                        break;
+                default: 
+                        printf("Opration n\'existe pas");
+        }
   
-write(connfd,&result,sizeof(result));   
-close(sockfd);
+        write(connfd,&result,sizeof(result));   
+        close(sockfd);
 }
