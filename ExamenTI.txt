@@ -1,0 +1,93 @@
+Filtrage : le principe de filtrage est de  modifier les valeur de pixels d'une image , generalement dans le but d'ameliorer son aspect.
+
+-en pratique , le filtrage consiste de creer une nouvelle image , en se servant des valeurs de pixels de l'image d'origine.
+
+	-les but de filrage : 
+	
+		-lissage local : il s'agit de supprimer le bruit dans une image .
+		-amelioration de l'image : il consiste de modifire une des caracteristique visuelles de l'images comme (contraste,..)
+		-restauration de l'image : il s'agit de supprimer la degradation subie par l'image .
+		
+	 -types de filtres :
+	 
+	 	-filtrage global : il s'agit de modifier la totalite des pixel de l'image , generalement on pase de l'espace pixel a l'espace frequentiel , en utilisant la trasnformer de fourier.
+	 	
+	 	-filtrage local : seulement applique sur un voisinage de pixel , il s'agit de remplacer la valeur d'une pixel , par la valeur d'une fonction applique sur ce pixel , et ces voisins.
+	 	
+	 
+	 -probleme de filtrage : effet de borad : les images qui se trouent dans le borad de l'image , n'ont pas des voisins , alors on ne peut pas appliquer un masque de covolution.
+	 
+	 -solution : duplication et effet de board 
+	 
+	 -duplication : les voisinages en dehors de l'image est considere comme un ensemble de pixel de valeur = 0
+	 
+	 -les voisinages en dehors de l'image prend la valeur des pixel de l'image le plus proche.
+	 
+	  -filre passe bas : contient que des valeur positive : a pour but diminue le bruit et attenue les details de l'image 
+	  
+	  -filtre passe haut : continet positives et negative , : amplifie le bruit et accentue les contours et les details de l'image
+	  
+	  
+	  -filtrage moyenneur , la value de chque pixel , et la moyenne des voisinages
+	  
+	  -c'est un filtrage passe bas , rend l'image flous 
+	  
+	  -laplacien : laplacien mesure la rapidite de changement de'ntensite sur le voisinage
+	  
+	  -un gradient permet de visualiser les variations d'un phenomene par rapport a un vecteur 
+	  
+	  
+	  -different operations du Morphologie :
+	  
+	  	-Erosion
+	  	-dilatation
+	  	-ouverture
+	  	-fermeture
+	  	
+	  	
+	 -Erosion :  	
+	 
+	 	-agrandit les trous -> favorise le noir
+	 	-enlever un pixel sur les pourtours de l'image
+	 	
+	 -Dilatation :
+	 
+	 	-boucher le trous -> favorise le blanc
+	 	-ajouter un pixel sur les pourtours de l'image 
+	 	
+	 Ouverture = Erosion -> dilatation : elimine les trous plus pett que b en gardant la meme forme
+	 Fermeture = Dilatation -> Erosion : bouche les trous plus petis que b , en gardan la meme forme
+	 
+	 
+	 load image = imread("myiagme.png");
+	 -rgb > rgb2gray(I)
+	 -I2 = imbinarize(I1);
+	 -im2bw
+	 
+	 E1 = imerode(I2,strel('square',5))
+	 E2 = imerode(I2,strel('disk',6))
+
+	imdilate	 
+	 
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	 

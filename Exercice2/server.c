@@ -9,77 +9,79 @@
 #define PORT 2021
 #define SA struct sockaddr
 
-void func(int connfd)
-{
-	char buff[MAX];
-	int n;
-	for (;;) {
-		bzero(buff, MAX);
 
-		read(connfd, buff, sizeof(buff));
-		printf("From client: %s\t To client : ", buff);
-		bzero(buff, MAX);
-		n = 0;
-		while ((buff[n++] = getchar()) != '\n')
-			;
-
-		write(connfd, buff, sizeof(buff));
-
-		if (strncmp("exit", buff, 4) == 0) {
-			printf("Server Exit...\n");
-			break;
-		}
-	}
-}
 
 int main()
 {
+        char operator;
+        int op1,op2,result;
+
 	int sockfd, connfd, len;
 	struct sockaddr_in6 servaddr, cli;
 
+        //craetion du socket
 	sockfd = socket(AF_INET6, SOCK_STREAM, 0);
 	if (sockfd == -1) {
-		printf("socket creation failed...\n");
+		printf("la création du socket a échoué\n");
 		exit(0);
 	}
 	else
-		printf("Socket successfully created..\n");
-	bzero(&servaddr, sizeof(servaddr));
+		printf("Socket créé avec succès\n");
+	memset(&servaddr, 0 ,sizeof(servaddr));
 
-	// assign IP, PORT
 	servaddr.sin6_family = AF_INET6;
 	servaddr.sin6_addr = in6addr_any;
 	servaddr.sin6_port = htons(PORT);
 
-	// Binding newly created socket to given IP and verification
+        //connecter le serveur avec le client
 	if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) {
-		printf("socket bind failed...\n");
+		printf("a connexion avec le serveur a échoué\n");
 		exit(0);
 	}
 	else
-		printf("Socket successfully binded..\n");
+		printf("connecté au serveur\n");
 
-	// Now server is ready to listen and verification
+	// serveur pret a ecouter
 	if ((listen(sockfd, 5)) != 0) {
-		printf("Listen failed...\n");
+		printf("Échec de l'écoute\n");
 		exit(0);
 	}
 	else
-		printf("Server listening..\n");
+		printf("serveur à l'écoute\n");
 	len = sizeof(cli);
 
-	// Accept the data packet from client and verification
+	// Accepter les donnes du client
 	connfd = accept(sockfd, (SA*)&cli, &len);
 	if (connfd < 0) {
-		printf("server accept failed...\n");
+		printf("échec de l'acceptation du serveur\n");
 		exit(0);
 	}
 	else
-		printf("server accept the client...\n");
+		printf("le serveur accepte le client\n");
 
-	// Function for chatting between client and server
-	func(connfd);
+	// Logique du calculatrice
+	read(connfd, &operator,10);
+        read(connfd,&op1,sizeof(op1));
+        read(connfd,&op2,sizeof(op2));
 
-	// After chatting close the socket
+        switch(operator) {
+                case '+': result=op1 + op2;
+                printf("Resultat  de (+) est : %d + %d = %d\n",op1, op2, result);
+                break;
+                case '-':result=op1 - op2;
+                        printf("Resultat de (-) est: %d - %d = %d\n",op1, op2, result);
+                        break;
+                case '*':result=op1 * op2;
+                        printf("Resultat de (*) est: %d * %d = %d\n",op1, op2, result);
+                        break;
+                case '/':result=op1 / op2;
+                        printf("Resultat de (/) est : %d / %d = %d\n",op1, op2, result);
+                        break;
+                default: 
+                        printf("Opration n\'existe pas");
+        }
+  
+        write(connfd,&result,sizeof(result));  
+
 	close(sockfd);
 }

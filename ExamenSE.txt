@@ -1,0 +1,214 @@
+Systeme Embarque :
+
+Exercice 1:
+	Partie 1:
+
+	1-verifier que les modules existes : 
+		-pour pci (ethernet) on a le module e1000 : lsmod | grep e1000
+		-pour usb (flash) on a le module vfat : lsmod | grep vfat
+		
+	2-verfier que le peripherique existe sur le bus :
+		-pour pci : lspci | grep -i ethernet
+		-pour usb : lsusb | grep -i flash
+		
+	3-voir la configuration de ces peropherique
+		-pour pci : lspci -v -s 00:03.1 (tq 00:bus et 03.1 slot)
+		-pour usb : lsusb -v -s 001:043 (tq 001:bus et 043 numero de device)
+	
+	4-pour voir les informations sur les peripherique:
+		-pour pci : udevadm info -p /sys/class/net/eth0 -a
+		-pour usb : udevadm info -p /sys/bus/usb/devices/1-3 -a
+		
+	Partie 2:
+	
+	-installation d'un software :
+		1-telecharger le software :wget https://www.softforge.com/frizing.tar.bz2
+		2-decompresser le software : bzi2 -dv frizing.tar.bz2
+		3-se positioner en repertoire de sofware : cd frizing
+		4-configurer l'emplacement d'installation : ./configure --prefix=$HOME
+		5-compilation : make
+		6-installation : make install
+		7-nettoyer l'arborescence de repertoire : make clean
+		
+		
+Exercice 2 :
+
+	Partie 1 : configuration d'un nouveau noyeau 
+		
+		1-telecharger : wget https://www.kernel.org/pub/linux/kernel/v3.2/linux-3.2.0.6.tar.bz2
+		2-decompresser : bzip2 -dv linux-3.2.0.6.tar.bz2
+		3-cd linux-3.2.0.6
+		4-configurer : ./configure --prefix=/media/embeddedKernel
+		5-compilation : make
+		6-installation : make install
+		7-nettoyage : make clean
+		
+	Partie 2 : mettre a jour un noyeau 
+	
+		par exemple passer d'une version 2.1.0.5 a la version 2.1.0.7 , il faut disposer les versions 2.1.0.6 et 2.1.0.7
+		
+		-telecharger les patchs:
+			wget https://www.kernel.org/pub/linux/kernel/v2.1/incr/patch-2.1.0.6.tar.bz2
+			wget https://www.kernel.org/pub/linux/kernel/v2.1/incr/patch-2.1.0.7.tar.bz2
+			
+		-decompresser :
+			bzip2 -dv patch-2.1.0.6.tar.bz2
+			bzip2 -dv patch-2.1.0.7.tar.bz2
+		
+		-appliques les patch
+			cd linux-2.0.1.5
+			patch -p1 < ../patch-2.1.0.6
+			patch -p1 < ../patch-2.1.0.7
+			
+		-verifier le changement :
+			head Makefile
+			
+			
+	Question de cour : les different methodes pour configurer un noyeau 
+	
+		1-make config : la methode la plus utilise , c'est une interface en mode text , le seul incovenient c'est qu'on ne peut pas revenir au quesions precedente pour changer les reponses.
+		
+		2-make xconfig : cette methode necessite X WINDOW , mais pas recommander , il n'analyse pas bien la synthaxe de fichier de configuration d'une maniere assez fiable .
+		
+		3-make oldconfig : cette methode dispose un acces vers le fichier de configuration actuel (.config) , alors il demande juste des reponses pour les questions qui existent pas avant .
+		
+		
+		
+Exercice 3 :
+
+	Qusetions : les different composant necessaire pour emulation d'un rasbian
+	
+		-il faut avoir : le logiciel qemu , kernel-qemu , et l'image du rasbian qu'on veut emuler.
+		
+	Partie 1 : Emuler rasbian 
+	
+		-on aura une seule commande : comment lancer l'emulation du rasbian
+		
+			qemu-system-arm -kernel /Image/kernel-qemu-4.4.34-jessie 
+			-cpu arm1176
+			-m 256
+			-M versatilepb
+			-serial stdio
+			-append "root=/dev/sda2 rootfstype=ext4 rw"
+			-hda Image/2021-rasbian-strech.img
+			-redir tcp:5022::22
+			-no-reboot
+	
+Exercice 4 :
+
+	-Semaphore , Mutex , Tasks 
+	-pas de questions de cour 
+	-video de Mutex : https://www.youtube.com/watch?v=rqpbQlzgws0
+	
+	
+		
+Mutex code :
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <task.h>
+#include <freeRTOS.h>
+#include <semphr.h>		
+
+
+TaskHandle_t myTask1Hanlde = NULL;
+TaskHandle_t myTask2Handle = NULL;
+SemaphoreHandle_t xMutex;
+
+
+char shredRessource[10];	
+
+void myTask1 (void *p){
+	
+	char data1[] = "potatoes";
+	while(1){
+		
+		if( xSemaphoreTake(xMutex) == 1 ){
+			int i;
+			
+			for(i=0;i<9;i++){
+				sharedRessource[i] = data1[i];
+			}
+			
+			sharedRessource[i] = 0;
+			
+			printf("T1 : %s",sharedRessource);
+			
+			xSemaphoreGive(xMutex);
+		}
+		
+		vTaskDelay(100);
+	}
+}		
+		
+		
+void myTask2(void *p){
+	
+	char data2[] = "tomatoes";
+	while(1){
+		
+		if( xSemaphoreTake(xMutex) == 1 ){
+	
+			int i;
+			
+			for(i=0;i<9;i++){
+				sharedRessource[i] = data2[i];
+			}
+			
+			sharedRessource[i] = 0;
+			
+			printf("T2 : %s",sharedRessource);
+			
+			xSemaphoreGive(xMutex);
+		}
+		
+		vTaskDelay(100);  
+	}
+}	
+
+
+int main(void){
+
+	xTaskCreate(myTask1,"task1",200,(void*) 0, tskIDLE_PRIORITY, &myTask1Hadnle);
+	xTaskCreate(myTask2,"task2",200,(void*) 0, tskIDLE_PRIORITY, &myTask2Handle);
+	
+	//
+	
+	vTaskStartScheduler();
+	
+	xMutex = xSemaphoreCreateMutex();
+	
+	while(1){
+		//code to execute
+	}
+}		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	
+		
+
